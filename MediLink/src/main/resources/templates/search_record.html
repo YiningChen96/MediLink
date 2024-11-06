@@ -61,7 +61,6 @@
                 <input type="text" id="searchInput" name="email" placeholder="Enter Value" required />
                 <input type="hidden" name="license" th:value="${license}" />
                 <input type="hidden" name="name" th:value="${name}" />
-                <input type="hidden" name="patien" th:value="${name}" />
                 <button type="submit" class="button">Search</button>
 
                 <!-- Display Patient Name or Error Message -->
@@ -88,6 +87,13 @@
             </select>
             <button id="downloadBtn" class="button download-button" style="display: none;" onclick="downloadPdf()">Download</button>
             <button id="deleteBtn" class="button delete-button" style="display: none;" onclick="deletePdf()">Delete</button>
+
+            <!-- Hidden Delete Form -->
+            <form id="deleteForm" method="POST" style="display: none;">
+                <input type="hidden" name="license" th:value="${license}">
+                <input type="hidden" name="name" th:value="${name}">
+                <input type="hidden" name="patientUsername" th:value="${patientAccount.username}">
+            </form>
 
             <!-- Upload Section -->
             <form method="POST" enctype="multipart/form-data" th:action="@{/doctorupload}" style="margin-top: 20px;">
@@ -138,7 +144,7 @@
                 document.getElementById('downloadBtn').setAttribute('data-url', downloadUrl);
                 document.getElementById('deleteBtn').style.display = 'inline';
                 const deleteUrl = selectedOption.getAttribute('data-delete-url');
-                document.getElementById('deleteBtn').setAttribute('data-url', deleteUrl);
+                document.getElementById('deleteForm').action = deleteUrl;
             } else {
                 document.getElementById('pdfViewer').src = '';
                 document.getElementById('downloadBtn').style.display = 'none';
@@ -154,9 +160,9 @@
         }
 
         function deletePdf() {
-            const deleteUrl = document.getElementById('deleteBtn').getAttribute('data-url');
-            if (deleteUrl && confirm("Are you sure you want to delete this PDF?")) {
-                window.location.href = deleteUrl;
+            const deleteForm = document.getElementById('deleteForm');
+            if (confirm("Are you sure you want to delete this PDF?")) {
+                deleteForm.submit();
             }
         }
     </script>
