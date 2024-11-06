@@ -1,3 +1,11 @@
 CREATE DATABASE MediLink;
 CREATE USER MediLink_admin@'localhost' IDENTIFIED BY '123456';
 GRANT ALL ON MediLink.* TO MediLink_admin@'localhost';
+ALTER TABLE files MODIFY file_data LONGBLOB;
+
+
+sudo mysql -u root
+
+SHOW TABLES;
+
+DROP TABLE IF EXISTS account, files;
