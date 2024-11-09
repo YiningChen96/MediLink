@@ -11,21 +11,21 @@ import jakarta.persistence.Lob;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "records")
-public class RecordsEntity {
+@Table(name = "prescription")
+public class Prescription {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
-    @Column(name = "records_name")
+    @Column(name = "prescription_name")
     private String fileName;
     
-    @Column(name = "records_type")
+    @Column(name = "prescription_type")
     private String fileType;
     
     @Lob
-    @Column(name = "records_data", columnDefinition = "LONGBLOB")
+    @Column(name = "prescription_data", columnDefinition = "LONGBLOB")
     private byte[] fileData;
 
     @Column(name = "uploaded_at")

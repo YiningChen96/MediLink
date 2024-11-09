@@ -15,24 +15,26 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.example.MediLink.model.PatientAccount;
-import com.example.MediLink.model.RecordsEntity;
+import com.example.MediLink.model.Prescription;
 import com.example.MediLink.repository.DoctorAccountRepository;
 import com.example.MediLink.repository.PatientAccountRepository;
-import com.example.MediLink.repository.RecordsRepository;
-import com.example.MediLink.service.RecordsService;
+import com.example.MediLink.repository.PrescriptionRepository;
+import com.example.MediLink.service.PrescriptionService;
 
 @Controller
-public class RecordsController {
+@RequestMapping("/prescription")
+public class PrescriptionController {
 
     @Autowired
-    private RecordsService fileService;
+    private PrescriptionService prescriptionService;
 
     @Autowired
-    private RecordsRepository fileRepository;
+    private PrescriptionRepository prescriptionRepository;
 
     @Autowired
     private DoctorAccountRepository doctorAccountRepository;
@@ -40,7 +42,15 @@ public class RecordsController {
     @Autowired
     private PatientAccountRepository patientAccountRepository;
 
-    // Show upload/download page
+    @GetMapping("/DoctorSearch_record")
+    public String DoctorSearch_record(@RequestParam("license") String license, Model model) {
+        // Add the license to the model
+        model.addAttribute("license", license);
+        model.addAttribute("name", doctorAccountRepository.findByLicense(license).get().getFullName());
+        // Return the name of the view
+        return "doctorprescription";
+    }
+
     @GetMapping("/returnPatient.html")
     public String returnPatient(@RequestParam("username") String username, Model model) {
         model.addAttribute("username", username);
@@ -56,53 +66,36 @@ public class RecordsController {
 
     @GetMapping("/medical-records")
     public String showUploadPage(@RequestParam("username") String username, Model model) {
-        List<RecordsEntity> files = fileService.getFilesByUsername(username);
+        List<Prescription> files = prescriptionService.getFilesByUsername(username);
         model.addAttribute("files", files);
         model.addAttribute("username", username);
-        return "Patientrecords"; // Ensure this template exists
+        return "Patientprescription"; // Ensure this template exists
     }
 
-    // Upload a File
-    @PostMapping("/recordspatientupload")
-    public String patientuploadFile(@RequestParam("file") MultipartFile file,
-                             @RequestParam("username") String username, 
-                             Model model) {
-        try {
-            fileService.saveFile(file, username);
-            model.addAttribute("message", "File uploaded successfully!");
-        } catch (IOException e) {
-            model.addAttribute("message", "Failed to upload file: " + e.getMessage());
-        }
-        List<RecordsEntity> files = fileService.getFilesByUsername(username);
-        model.addAttribute("files", files);
-        model.addAttribute("username", username);
-        return "Patientrecords"; 
-    }
-
-    @PostMapping("/recordsdoctorupload")
-    public String doctoruploadFile(@RequestParam("license") String license,
+    @PostMapping("/Prescriptionupload")
+    public String PrescriptionuploadFile(@RequestParam("license") String license,
                              @RequestParam("name") String name,
                              @RequestParam("file") MultipartFile file,
                              @RequestParam("patientUsername") String patientUsername, 
                              Model model) {
         try {
-            fileService.saveFile(file, patientUsername);
+            prescriptionService.saveFile(file, patientUsername,license);
             model.addAttribute("message", "File uploaded successfully!");
         } catch (IOException e) {
             model.addAttribute("message", "Failed to upload file: " + e.getMessage());
         }
-        List<RecordsEntity> files = fileService.getFilesByUsername(patientUsername);
+        List<Prescription> files = prescriptionService.getFilesByUsername(patientUsername);
         model.addAttribute("files", files);
         model.addAttribute("name", name);
         model.addAttribute("license", license);
         model.addAttribute("patientAccount", patientAccountRepository.findByUsername(patientUsername).get());
-        return "search_record"; 
+        return "doctorprescription"; 
     }
 
     // Download a File
     @GetMapping("/download/{id}")
     public ResponseEntity<ByteArrayResource> downloadFile(@PathVariable Long id) {
-        return fileService.getFile(id)
+        return prescriptionService.getFile(id)
             .map(fileEntity -> ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType(fileEntity.getFileType()))
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileEntity.getFileName() + "\"")
@@ -112,7 +105,7 @@ public class RecordsController {
 
     @GetMapping("/files/{id}")
     public ResponseEntity<Resource> viewFile(@PathVariable Long id) {
-        RecordsEntity fileEntity = fileService.getFile(id).orElse(null);
+        Prescription fileEntity = prescriptionService.getFile(id).orElse(null);
     
         if (fileEntity == null) {
             return ResponseEntity.notFound().build();
@@ -127,23 +120,15 @@ public class RecordsController {
                 .body(resource);
     }
 
-    @GetMapping("/delete/{id}")
-    public String deleteFile(@PathVariable Long id, @RequestParam String username, Model model) {
-        fileRepository.deleteById(id);
-        model.addAttribute("username", username);
-        model.addAttribute("files", fileService.getFilesByUsername(username));
-        return "Patientrecords"; 
-    }
-
     @PostMapping("doctordelete/{id}")
     public String patientdeleteFile(@RequestParam("license") String license,@RequestParam("name") String name,@PathVariable Long id, @RequestParam("patientUsername") String patientUsername, Model model) {
-        fileRepository.deleteById(id);
-        List<RecordsEntity> files = fileService.getFilesByUsername(patientUsername);
+        prescriptionRepository.deleteById(id);
+        List<Prescription> files = prescriptionService.getFilesByUsername(patientUsername);
         model.addAttribute("files", files);
         model.addAttribute("name", name);
         model.addAttribute("license", license);
         model.addAttribute("patientAccount", patientAccountRepository.findByUsername(patientUsername).get());
-        return "search_record"; 
+        return "doctorprescription"; 
     }
 
     // Search files by email
@@ -156,14 +141,14 @@ public class RecordsController {
             model.addAttribute("message", "This patient account doesn't exist!");
             model.addAttribute("name", doctorAccountRepository.findByLicense(license).get().getFullName());
             model.addAttribute("license", license);
-            return "search_record"; 
+            return "doctorprescription"; 
         }
-            List<RecordsEntity> files = fileService.getFilesByEmail(email);
+            List<Prescription> files = prescriptionService.getFilesByEmail(email);
             model.addAttribute("license", license);
             model.addAttribute("files", files);
             model.addAttribute("email", email);
             model.addAttribute("name", doctorAccountRepository.findByLicense(license).get().getFullName());
-            return "search_record"; 
+            return "doctorprescription"; 
     }
 
     // Search files by phone
@@ -176,15 +161,15 @@ public class RecordsController {
             model.addAttribute("message", "This patient account doesn't exist!");
             model.addAttribute("name", doctorAccountRepository.findByLicense(license).get().getFullName());
             model.addAttribute("license", license);
-            return "search_record";
+            return "doctorprescription";
         }
-        List<RecordsEntity> files = fileService.getFilesByPhone(phone);
+        List<Prescription> files = prescriptionService.getFilesByPhone(phone);
             model.addAttribute("license", license);
             model.addAttribute("files", files);
             model.addAttribute("phone", phone);
             model.addAttribute("name", doctorAccountRepository.findByLicense(license).get().getFullName());
 
-            return "search_record"; 
+            return "doctorprescription"; 
         
     }
 
@@ -198,14 +183,14 @@ public class RecordsController {
             model.addAttribute("name", doctorAccountRepository.findByLicense(license).get().getFullName());
             model.addAttribute("license", license);
             model.addAttribute("message", "This patient account doesn't exist!");
-            return "search_record";
+            return "doctorprescription";
         }
-        List<RecordsEntity> files = fileService.getFilesByUsername(username);
+        List<Prescription> files = prescriptionService.getFilesByUsername(username);
         model.addAttribute("license", license);
         model.addAttribute("files", files);
         model.addAttribute("username", username);
         model.addAttribute("name", doctorAccountRepository.findByLicense(license).get().getFullName());
 
-        return "search_record"; // Ensure this template exists
+        return "doctorprescription"; // Ensure this template exists
     }
 }

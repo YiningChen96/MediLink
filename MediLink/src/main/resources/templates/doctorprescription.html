@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Search and View Patient Records - MediLink</title>
+    <title>Search and View Prescription</title>
     <link rel="stylesheet" href="/css/records.css">
     <style>
         /* Additional styling */
@@ -40,7 +40,7 @@
 
     <!-- Header Section -->
     <div class="header">
-        <a th:href="@{/returnDoctor.html(license=${license})}" class="return-button">
+        <a th:href="@{/prescription/returnDoctor.html(license=${license})}" class="return-button">
             &#8592; Return
         </a>
         <h2 style="margin: 0;">Welcome, Doctor: <span th:text="${name}"></span></h2>
@@ -49,7 +49,7 @@
     <!-- Main Container for Search and Record Selection -->
     <div class="main-container">
         <!-- Search Function Container -->
-        <form method="get" th:action="@{/search-by-email}" id="searchForm">
+        <form method="get" th:action="@{/prescription/search-by-email}" id="searchForm">
             <div class="search-container">
                 <label for="searchCriteria">Search Patient By:</label>
                 <select id="searchCriteria" name="searchType" onchange="updateSearchAction(this.value)">
@@ -76,13 +76,13 @@
 
         <!-- Record Selection and Upload Container -->
         <div class="record-selection-container" th:if="${files != null}">
-            <label for="pdfDropdown">Select Medical Record:</label>
+            <label for="pdfDropdown">Select Prescription:</label>
             <select id="pdfDropdown" onchange="viewPdf(this.value)">
                 <option value="">-- Select a file --</option>
                 <th:block th:each="file : ${files}">
-                    <option th:value="@{/files/{id}(id=${file.id})}" th:text="${file.fileName}"
-                        th:data-download-url="@{/download/{id}(id=${file.id})}"
-                        th:data-delete-url="@{/doctordelete/{id}(id=${file.id})}"></option>
+                    <option th:value="@{/prescription/files/{id}(id=${file.id})}" th:text="${file.fileName}"
+                        th:data-download-url="@{/prescription/download/{id}(id=${file.id})}"
+                        th:data-delete-url="@{/prescription/doctordelete/{id}(id=${file.id})}"></option>
                 </th:block>
             </select>
             <button id="downloadBtn" class="button download-button" style="display: none;" onclick="downloadPdf()">Download</button>
@@ -96,11 +96,11 @@
             </form>
 
             <!-- Upload Section -->
-            <form method="POST" enctype="multipart/form-data" th:action="@{/recordsdoctorupload}" style="margin-top: 20px;">
+            <form method="POST" enctype="multipart/form-data" th:action="@{/prescription/Prescriptionupload}" style="margin-top: 20px;">
                 <input type="hidden" name="patientUsername" th:value="${patientAccount.username}" />
                 <input type="hidden" name="license" th:value="${license}" />
                 <input type="hidden" name="name" th:value="${name}" />
-                <label for="fileUpload">Upload Medical Record (PDF):</label>
+                <label for="fileUpload">Upload Prescription (PDF):</label>
                 <input type="file" id="fileUpload" name="file" accept="application/pdf" required />
                 <button type="submit" class="button">Upload</button>
             </form>
@@ -122,13 +122,13 @@
 
             // Set form action and input name based on the selected criteria
             if (value === 'email') {
-                searchForm.action = '/search-by-email';
+                searchForm.action = '/prescription/search-by-email';
                 searchInput.name = 'email';
             } else if (value === 'phone') {
-                searchForm.action = '/search-by-phone';
+                searchForm.action = '/prescription/search-by-phone';
                 searchInput.name = 'phone';
             } else if (value === 'username') {
-                searchForm.action = '/search-by-username';
+                searchForm.action = '/prescription/search-by-username';
                 searchInput.name = 'username';
             }
         }

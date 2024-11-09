@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Upload and View Medical Records</title>
+    <title>Upload and View Prescription</title>
     <link rel="stylesheet" href="/css/records.css">
     <style>
         /* General Button Styling */
@@ -37,27 +37,17 @@
             <span>Welcome, <span id="usernameSpan" th:text="${username}"></span>!</span>
             <button class="button return-button" onclick="returnHome()">Return</button> <!-- Return Button -->
         </div>
-        <div class="nav-center">
-            <form method="POST" enctype="multipart/form-data" action="/recordspatientupload" class="upload-form">
-                <input type="hidden" name="username" th:value="${username}"/> <!-- Hidden field for username -->
-                <label for="file">Upload PDF</label>
-                <input type="file" id="file" name="file" accept="application/pdf" required>
-                <button type="submit" class="button">Upload</button> <!-- Upload Button -->
-            </form>
-        </div>
         <div class="nav-right">
-            <label for="pdfDropdown">Select Medical Record</label>
+            <label for="pdfDropdown">Select Prescription</label>
             <select id="pdfDropdown" onchange="viewPdf(this.value)">
                 <option value="">-- Select a file --</option>
                 <th:block th:each="file : ${files}">
-                    <option th:value="@{/files/{id}(id=${file.id})}" th:text="${file.fileName}"
-                        th:data-download-url="@{/download/{id}(id=${file.id})}"
-                        th:data-delete-url="@{/delete/{id}(id=${file.id})}">
+                    <option th:value="@{/prescription/files/{id}(id=${file.id})}" th:text="${file.fileName}"
+                        th:data-download-url="@{/prescription/download/{id}(id=${file.id})}">
                     </option>
                 </th:block>
             </select>
             <button id="downloadBtn" class="button download-button" style="display: none;" onclick="downloadPdf()">Download</button> <!-- Download Button -->
-            <button id="deleteBtn" class="button delete-button" style="display: none;" onclick="deletePdf()">Delete</button> <!-- Delete Button -->
         </div>
     </nav>
 
@@ -69,7 +59,7 @@
     <script>
         function returnHome() {
             const username = document.getElementById('usernameSpan').textContent; // Get the username directly
-            const returnUrl = "/returnPatient.html?username=" + encodeURIComponent(username); // Construct URL with username
+            const returnUrl = "/prescription/returnPatient.html?username=" + encodeURIComponent(username); // Construct URL with username
             window.location.href = returnUrl; // Redirect to return URL with username
         }
 
@@ -100,17 +90,6 @@
                 // Redirect to the PDF URL with username as a query parameter
                 const downloadWithUsernameUrl = pdfUrl + "?username=" + encodeURIComponent(username);
                 window.location.href = downloadWithUsernameUrl; // Trigger download
-            }
-        }
-
-        function deletePdf() {
-            const deleteUrl = document.getElementById('deleteBtn').getAttribute('data-url'); // Get the URL for deletion
-            const username = document.getElementById('usernameSpan').textContent; // Get the username directly
-
-            if (deleteUrl && confirm("Are you sure you want to delete this PDF?")) {
-                // Redirect to the delete URL with username as query parameter
-                const deleteWithUsernameUrl = deleteUrl + "?username=" + encodeURIComponent(username);
-                window.location.href = deleteWithUsernameUrl;  // Use standard navigation
             }
         }
     </script>
