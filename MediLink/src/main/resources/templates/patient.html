@@ -19,7 +19,7 @@
                 <li><a href="#dashboard">Dashboard</a></li>
                 <li><a href="#patients">Doctor Info</a></li>
                 <li><a th:href="@{/medical-records(username=${username})}">Medical Records</a></li>
-                <li><a href="#notifications">Support</a></li>
+                <li><a th:href="@{/api/contact/returncontact(username=${username})}">Support</a></li>
 
                 <!-- Dropdown Menu for Account -->
                 <li class="dropdown">
@@ -89,7 +89,8 @@
                     <p>Search and view information about doctors, including contact details and specialties.</p>
                 </section>
 
-                <section class="wedge-card" id="customer-support" onclick="location.href='#customer-support'">
+                <!-- Updated Customer Support Section -->
+                <section class="wedge-card" id="customer-support" th:onclick="|location.href='@{/api/contact/returncontact(username=${username})}'|">
                     <img src="https://cdn-icons-png.flaticon.com/512/3078/3078927.png" alt="Support Icon">
                     <h4>Customer Support</h4>
                     <p>Have billing queries or other concerns? Contact our support team.</p>
