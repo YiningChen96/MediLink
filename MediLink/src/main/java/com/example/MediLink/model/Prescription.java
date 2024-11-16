@@ -37,6 +37,8 @@ public class Prescription {
     @Column(name = "doctor_license") // New field for username
     private String doctorLicense;
 
+    private String status;
+
     // Getters and Setters
     public Long getId() {
         return id;
@@ -92,5 +94,13 @@ public class Prescription {
 
     public void setDoctorLicense(String doctorLicense) {
         this.doctorLicense = doctorLicense; // Setter for username
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 }

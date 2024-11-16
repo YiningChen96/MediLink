@@ -84,7 +84,7 @@ public String updatePatientAccount(
 
 
     }
-        
+        model.addAttribute("unread", patientAccountRepository.findByUsername(originalUsername).get().getUnread());
         model.addAttribute("username", updatedAccount.getUsername());
         return "patient"; // Redirect to home page on success
 

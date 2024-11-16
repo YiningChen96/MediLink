@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import com.example.MediLink.repository.PatientAccountRepository;
 import com.example.MediLink.service.EmailService;
 
 @Controller
@@ -18,9 +19,13 @@ public class ContactController {
     @Autowired
     private EmailService emailService;
 
+    @Autowired
+    private PatientAccountRepository patientAccountRepository;
+    
     @GetMapping("/returncontact")
     public String returncontact(@RequestParam("username") String username, Model model) {
         model.addAttribute("username", username);
+        model.addAttribute("unread", patientAccountRepository.findByUsername(username).get().getUnread());
         return "contact"; // Ensure this template exists
     }
 

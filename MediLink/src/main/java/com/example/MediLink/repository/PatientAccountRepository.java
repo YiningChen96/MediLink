@@ -13,4 +13,5 @@ public interface PatientAccountRepository extends JpaRepository<PatientAccount, 
 
         // Find account by phone number
         Optional<PatientAccount> findByPhone(String phone);
+        
 }

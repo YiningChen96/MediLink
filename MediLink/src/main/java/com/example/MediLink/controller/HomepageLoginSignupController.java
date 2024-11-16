@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import com.example.MediLink.model.DoctorAccount;
 import com.example.MediLink.model.PatientAccount;
 import com.example.MediLink.repository.DoctorAccountRepository;
+import com.example.MediLink.repository.PatientAccountRepository;
 import com.example.MediLink.service.DoctorAccountService;
 import com.example.MediLink.service.PatientAccountService;
 
@@ -24,6 +25,9 @@ public class HomepageLoginSignupController {
 
     @Autowired
     private DoctorAccountRepository doctorAccountRepository;
+
+    @Autowired
+    private PatientAccountRepository patientAccountRepository;
 
     @GetMapping("/login.html")
     public String returnLogin() {
@@ -89,6 +93,7 @@ public class HomepageLoginSignupController {
         
         if (isAuthenticated) {
             model.addAttribute("username", username);
+            model.addAttribute("unread", patientAccountRepository.findByUsername(username).get().getUnread());
             return "patient"; // Redirect to home page on success
         } else {
             model.addAttribute("errorMessage", "Can't find an account with that username and password.");

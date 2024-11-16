@@ -56,10 +56,17 @@
                     <p>View your recent test results and medical records.</p>
                 </section>
 
-                <section class="wedge-card" onclick="location.href='#notifications'">
+                <section class="wedge-card" th:onclick="|location.href='@{/notification/returnNotification.html(username=${username})}'|">
                     <img src="https://cdn-icons-png.flaticon.com/512/2950/2950606.png" alt="Notifications Icon">
                     <h4>Account Notifications</h4>
-                    <p>No new notifications at the moment.</p>
+                    <p>
+                        <span th:if="${unread > 0}" style="color: red;">
+                            You have <span th:text="${unread}">0</span> unread notifications.
+                        </span>
+                        <span th:if="${unread == 0}">
+                            No new notifications at the moment.
+                        </span>
+                    </p>
                 </section>
 
                 <section class="wedge-card" onclick="location.href='#doctor-diagnosis'">

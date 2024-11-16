@@ -8,4 +8,5 @@ import com.example.MediLink.model.RecordsEntity;
 
 public interface RecordsRepository extends JpaRepository<RecordsEntity, Long> {
     List<RecordsEntity> findByUsername(String username);
+    List<RecordsEntity> findByStatusAndUsername(String status, String username);
 }

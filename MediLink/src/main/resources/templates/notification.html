@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notifications</title>
+    <link rel="stylesheet" href="/css/records.css">
+    <style>
+        .button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            font-size: 0.9rem;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+
+        .button.return-button {
+            background-color: orange;
+        }
+
+        .button.download-button {
+            background-color: blue;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="nav-left">
+            <span>Welcome, <span id="usernameSpan" th:text="${username}"></span>!</span>
+            <button class="button return-button" onclick="returnHome()">Return</button>
+        </div>
+        <div class="nav-right">
+            <!-- Dropdown for Records -->
+            <label for="recordDropdown">Select Record</label>
+            <select id="recordDropdown" onchange="viewPdf(this.value, 'records')">
+                <option value="">-- Select a record --</option>
+                <th:block th:each="record : ${records}">
+                    <option th:value="@{/notification/records/{id}(id=${record.id})}" th:text="${record.fileName}"
+                        th:data-download-url="@{/download/{id}(id=${record.id})}">
+                    </option>
+                </th:block>
+            </select>
+
+            <!-- Dropdown for Prescriptions -->
+            <label for="prescriptionDropdown">Select Prescription</label>
+            <select id="prescriptionDropdown" onchange="viewPdf(this.value, 'prescription')">
+                <option value="">-- Select a prescription --</option>
+                <th:block th:each="file : ${prescription}">
+                    <option th:value="@{/notification/prescription/{id}(id=${file.id})}" th:text="${file.fileName}"
+                        th:data-download-url="@{/prescription/download/{id}(id=${file.id})}">
+                    </option>
+                </th:block>
+            </select>
+
+            <button id="downloadBtn" class="button download-button" style="display: none;" onclick="downloadPdf()">Download</button>
+        </div>
+    </nav>
+
+    <!-- PDF Viewer Section -->
+    <div class="pdf-viewer">
+        <iframe id="pdfViewer" width="100%" height="90vh" style="border: none;"></iframe>
+    </div>
+
+    <script>
+        function returnHome() {
+            const username = document.getElementById('usernameSpan').textContent;
+            const returnUrl = "/prescription/returnPatient.html?username=" + encodeURIComponent(username);
+            window.location.href = returnUrl;
+        }
+
+        function viewPdf(pdfUrl, type) {
+            const dropdown = type === 'records' ? document.getElementById('recordDropdown') : document.getElementById('prescriptionDropdown');
+            const selectedOption = dropdown.options[dropdown.selectedIndex];
+
+            if (pdfUrl) {
+                document.getElementById('pdfViewer').src = pdfUrl;
+                document.getElementById('downloadBtn').style.display = 'inline';
+                const downloadUrl = selectedOption.getAttribute('data-download-url');
+                document.getElementById('downloadBtn').setAttribute('data-url', downloadUrl);
+            } else {
+                document.getElementById('pdfViewer').src = '';
+                document.getElementById('downloadBtn').style.display = 'none';
+            }
+        }
+
+        function downloadPdf() {
+            const pdfUrl = document.getElementById('downloadBtn').getAttribute('data-url');
+            if (pdfUrl) {
+                window.location.href = pdfUrl;
+            }
+        }
+    </script>
+</body>
+</html>

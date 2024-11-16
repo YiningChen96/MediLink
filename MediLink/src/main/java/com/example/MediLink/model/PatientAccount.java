@@ -40,6 +40,8 @@ public class PatientAccount {
 
     private String zipCode;
 
+    private int unread;
+
     public PatientAccount(){
 
     }
@@ -173,6 +175,14 @@ public class PatientAccount {
 
     public void setZipCode(String zipCode) {
         this.zipCode = zipCode;
+    }
+
+    public int getUnread() {
+        return unread;
+    }
+
+    public void setUnread(int unread) {
+        this.unread = unread;
     }
 
 }

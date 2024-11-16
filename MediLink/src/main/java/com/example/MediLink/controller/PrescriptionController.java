@@ -24,6 +24,7 @@ import com.example.MediLink.model.Prescription;
 import com.example.MediLink.repository.DoctorAccountRepository;
 import com.example.MediLink.repository.PatientAccountRepository;
 import com.example.MediLink.repository.PrescriptionRepository;
+import com.example.MediLink.service.EmailService;
 import com.example.MediLink.service.PrescriptionService;
 
 @Controller
@@ -32,6 +33,9 @@ public class PrescriptionController {
 
     @Autowired
     private PrescriptionService prescriptionService;
+
+    @Autowired
+    private EmailService emailService;
 
     @Autowired
     private PrescriptionRepository prescriptionRepository;
@@ -54,6 +58,7 @@ public class PrescriptionController {
     @GetMapping("/returnPatient.html")
     public String returnPatient(@RequestParam("username") String username, Model model) {
         model.addAttribute("username", username);
+        model.addAttribute("unread", patientAccountRepository.findByUsername(username).get().getUnread());
         return "patient"; // Ensure this template exists
     }
 
@@ -79,8 +84,14 @@ public class PrescriptionController {
                              @RequestParam("patientUsername") String patientUsername, 
                              Model model) {
         try {
-            prescriptionService.saveFile(file, patientUsername,license);
+            Prescription prescription=prescriptionService.saveFile(file, patientUsername,license);
+            prescription.setStatus("unread");
+            prescriptionRepository.save(prescription); 
+            PatientAccount account=patientAccountRepository.findByUsername(patientUsername).get();
+            account.setUnread(account.getUnread()+1);
+            patientAccountRepository.save(account);
             model.addAttribute("message", "File uploaded successfully!");
+            emailService.sendNotificationEmail(name, account.getEmail(), file.getOriginalFilename(), doctorAccountRepository.findByLicense(license).get().getFullName());
         } catch (IOException e) {
             model.addAttribute("message", "Failed to upload file: " + e.getMessage());
         }

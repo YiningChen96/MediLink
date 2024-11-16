@@ -23,6 +23,7 @@ import com.example.MediLink.model.RecordsEntity;
 import com.example.MediLink.repository.DoctorAccountRepository;
 import com.example.MediLink.repository.PatientAccountRepository;
 import com.example.MediLink.repository.RecordsRepository;
+import com.example.MediLink.service.EmailService;
 import com.example.MediLink.service.RecordsService;
 
 @Controller
@@ -30,6 +31,9 @@ public class RecordsController {
 
     @Autowired
     private RecordsService fileService;
+
+    @Autowired
+    private EmailService emailService;
 
     @Autowired
     private RecordsRepository fileRepository;
@@ -44,6 +48,7 @@ public class RecordsController {
     @GetMapping("/returnPatient.html")
     public String returnPatient(@RequestParam("username") String username, Model model) {
         model.addAttribute("username", username);
+        model.addAttribute("unread", patientAccountRepository.findByUsername(username).get().getUnread());
         return "patient"; // Ensure this template exists
     }
 
@@ -86,8 +91,14 @@ public class RecordsController {
                              @RequestParam("patientUsername") String patientUsername, 
                              Model model) {
         try {
-            fileService.saveFile(file, patientUsername);
+            RecordsEntity records=fileService.saveFile(file, patientUsername);
+            records.setStatus("unread");
+            fileRepository.save(records);  
+            PatientAccount account=patientAccountRepository.findByUsername(patientUsername).get();
+            account.setUnread(account.getUnread()+1);
+            patientAccountRepository.save(account);
             model.addAttribute("message", "File uploaded successfully!");
+            emailService.sendNotificationEmail(name, account.getEmail(), file.getOriginalFilename(), doctorAccountRepository.findByLicense(license).get().getFullName());
         } catch (IOException e) {
             model.addAttribute("message", "Failed to upload file: " + e.getMessage());
         }

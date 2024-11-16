@@ -8,4 +8,5 @@ import com.example.MediLink.model.Prescription;
 
 public interface PrescriptionRepository extends JpaRepository<Prescription, Long> {
     List<Prescription> findByUsername(String username);
+    List<Prescription> findByStatusAndUsername(String status, String username);
 }
